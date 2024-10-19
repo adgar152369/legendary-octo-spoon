@@ -1,18 +1,31 @@
-import Projects from "./projects";
-import Task from "./task";
+import Task from "./task"
 
-export default function Project(title, category) {
-  let _projectId = Math.random() * 100
-  let _projectTitle = title
-  let _projectCategory = category
+export default class Project {
+  tasks = []
+  id = Math.floor(Math.random() * 200)
 
-  return {
-    getProjectInfo() {
-      return {
-        id: _projectId,
-        title: _projectTitle,
-        category: _projectCategory 
-      }
-    }
+  constructor(title, description) {
+    this.title = title
+    this.description = description
+  }
+
+  addTask(title, dueDate, description, priority) {
+    const newTask = new Task(title, dueDate, description, priority, this.id)
+    this.tasks.push(newTask)
+    return newTask
+  }
+
+  getTasks() {
+    return this.tasks
+  }
+  getTask(id) {
+    return this.tasks.find(task => task.id === id)
+  }
+
+  deleteTask(taskId) {
+    const taskIndex = this.tasks.findIndex(task => task.id === taskId)
+    const deletedTask = this.tasks.splice(taskIndex, 1)
+    
+    return deletedTask
   }
 }

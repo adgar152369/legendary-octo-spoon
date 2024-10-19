@@ -1,31 +1,42 @@
 import Project from "./project";
 
-const Priorities = Object.freeze({
-  none: 0,
-  low: 1,
-  medium: 2,
-  high: 3
-});
+export default class Projects {
+  static #defaultProject = new Project('default', 'lorem ipsum')
+  static #projects = new Set([])
 
-export default function Projects() {
-  let _projects = [];
+  static getProjects() {
+    return Array.from(Projects.#projects)
+  }
 
-  // methods:
-  const getProjects = () => _projects
-  const getProject = (projectId) => {
-    const project = _projects.find(p => p.id === projectId)
+  static getProject(id) {
+    const project = Projects.getProjects().find(p => p.id === id)
     return project
   }
-  const createProject = (title, category) => {
-    const newProject = Project(title, category)
-    _projects.push(newProject)
-  }
-  const deleteProject = (projectId) => {}
 
-  return {
-    getProjects,
-    getProject,
-    createProject,
-    deleteProject
+  static addProject(project) { // 'project' is an object   
+    for (const proj of this.#projects) {
+      if (proj === project) {
+        console.log('this project already exists!');
+        return
+      }
+    }
+    const newProject = new Project(project.title, project.description)
+    this.#projects.add(newProject)
+    return newProject
+  }
+
+  static deleteProject(id) {
+    for (const project of this.#projects) {      
+      if (project.id === id) {
+        if (project.title === 'default') {
+          console.error('cannot delete the default project')
+          return
+        } else {
+          this.#projects.delete(project) // Delete the project
+          console.log(`Project with id ${id} has been deleted.`)
+          return project
+        }
+      }
+    }
   }
 }
