@@ -1,8 +1,20 @@
 import "./styles.css";
 import Projects from "./app/projects";
 import { format, parseISO } from "date-fns";
+import Task from "./app/task";
+import Storage from "./app/Storage";
+import Project from "./app/project";
 
-Projects.addProject({ title: "Demo Project", description: "Lorem ipsum" });
+// const newProject = Projects.addProject({
+//   title: "Demo Project",
+//   description: "Lorem ipsum",
+// });
+// const defaultProject = Projects.getProject(newProject.id);
+// Storage.setProject({
+//   id: defaultProject.id,
+//   title: defaultProject.title,
+//   description: defaultProject.description,
+// });
 
 // DOM creation:
 const bodyContent = document.querySelector("#content");
@@ -27,11 +39,22 @@ bodyContent.appendChild(projectsList); // append projects list to body content
 
 // START
 function renderProjects() {
-  for (let project of Projects.getProjects()) {
+  // TODO: load from localStorage (from Projects class!):
+  new Projects();
+  const storedProjects = Projects.getProjects();
+  console.log(storedProjects);
+
+  if (storedProjects.length === 0) {
+    console.log("There are no projects to display yet.");
+    return false;
+  }
+
+  for (let project of storedProjects) {
     const projectItem = generateProjectEl(project); // generate project items
     addProjectToDOM(projectItem); // append project item to projects list
+    // TODO: save new project to localStorage
     // render tasks:
-    renderTasks(project);
+    // renderTasks(project);
   }
 }
 
@@ -119,15 +142,19 @@ function openProjectModal(modal) {
   // create project event listener:
   projectModalCreateBtn.addEventListener("click", (e) => {
     e.preventDefault();
+
+    // TODO: save project to localStorage:
     const projectData = {
       title: titleInput.value,
       description: descInput.value,
     };
-    // new project creation:
+
     const newProjectData = Projects.addProject(projectData);
+    // renderProjects();
+    // addToLocalStorage(newProjectData);
     const newProjectEl = generateProjectEl(newProjectData);
     addProjectToDOM(newProjectEl);
-    renderTasks(newProjectData);
+    // renderTasks(newProjectData);
 
     modal.close();
     bodyContent.removeChild(modal);
@@ -135,6 +162,7 @@ function openProjectModal(modal) {
 }
 
 function generateProjectEl(projectData) {
+  // console.log(projectData);
   const projectsList = document.querySelector(".projects-list");
   const projectItem = document.createElement("li");
   const projectTitle = document.createElement("h2");
@@ -291,26 +319,37 @@ function openTaskModal(modal) {
     .querySelector(".task-modal-form")
     .getAttribute("data-project");
 
+  // TODO: add function to add task to storage and dom:
   taskModalCreateBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    const parentProject = Projects.getProject(Number(taskProjectId));
-    const strDate = taskDueDate.value;
-    const isoDate = parseISO(strDate);
-    const newTaskData = parentProject.addTask(
-      taskTitle.value,
-      format(isoDate, "MM/dd/yy"),
-      taskDescription.value,
-      taskPriority.value,
-    );
-    console.log(newTaskData);
-    // console.log(newTaskData)
-    const newTaskEl = generateTaskEl(newTaskData);
-    // addTaskToDOM(newTaskEl)
-    renderTasks(parentProject);
-    modal.close();
-    bodyContent.removeChild(modal);
+    console.log(taskProjectId);
+    // const parentProject = Projects.getProject(Number(taskProjectId));
+    // const strDate = taskDueDate.value;
+    // const isoDate = parseISO(strDate);
+    // const newTaskData = parentProject.addTask(
+    //   taskTitle.value,
+    //   format(isoDate, "MM/dd/yy"),
+    //   taskDescription.value,
+    //   taskPriority.value,
+    // );
+    // const newTaskEl = generateTaskEl(newTaskData);
+    // renderTasks(parentProject);
+    // // add to local storage:
+    // addToLocalStorage(newTaskData);
+    // modal.close();
+    // bodyContent.removeChild(modal);
   });
 }
+
+function addToLocalStorage(itemType) {
+  if (itemType instanceof Task) {
+    console.log(Storage.setTask(itemType));
+  } else if (itemType instanceof Project) {
+    console.log(Storage.setProject(itemType));
+  }
+}
+
+function createTask() {}
 
 function addProjectToDOM(projectItem) {
   const projectsList = document.querySelector(".projects-list");
@@ -319,6 +358,7 @@ function addProjectToDOM(projectItem) {
 
 function removeProject(id) {
   const project = Projects.deleteProject(id);
+  console.log(project);
   if (project == null) {
     console.error("No such project exists!");
     return;
