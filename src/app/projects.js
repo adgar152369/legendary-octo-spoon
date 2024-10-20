@@ -6,52 +6,59 @@ export default class Projects {
   static #projects = new Set([]);
 
   constructor() {
-    // Load projects from localStorage
+    this.loadFromLocalStorage();
+  }
+
+  loadFromLocalStorage() {
+    Projects.#projects.clear();
+
     if (localStorage.length > 0) {
+      // console.log(localStorage.length);
+      // get from localStorage:
       for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i); // Get the key at index i
-        // console.log(key);
+        const key = localStorage.key(i);
         if (key.startsWith("Project-")) {
-          // Assuming you're storing projects with a 'Project-' prefix
-          const projectData = JSON.parse(localStorage.getItem(key)); // Parse JSON string to object
-          // console.log(projectData);
-          // Create a new project and add it to the Set
+          const storedProjectData = JSON.parse(localStorage.getItem(key));
           const newProject = new Project(
-            projectData.id,
-            projectData.title,
-            projectData.description,
+            storedProjectData.title,
+            storedProjectData.description,
+            storedProjectData.id,
           );
-          Projects.#projects.add(newProject); // Add to the Set
+          Projects.#projects.add(newProject);
         }
       }
+    } else {
+      console.log("empty localStorage");
     }
   }
 
   static getProjects() {
-    const projects = [];
-    // load from localStorage:
-    for (let project of Array.from(Projects.#projects)) {
-      const storedProject = Projects.getProject(project.id);
-      projects.push(storedProject);
-    }
-    return projects;
+    return Array.from(Projects.#projects);
   }
 
   static getProject(id) {
     // load from localStorage:
-    const project = localStorage.getItem(`Project-${id}`);
-    return JSON.parse(project);
+    const storedProject = JSON.parse(localStorage.getItem(`Project-${id}`));
+    // console.log(storedProject);
+    // translate back into an object of type Project:
+    const project = new Project(
+      storedProject.id,
+      storedProject.title,
+      storedProject.description,
+    );
+    return project;
   }
 
   static addProject(project) {
     // 'project' is an object
-    for (const proj of this.#projects) {
-      if (proj === project) {
+    for (const proj of Projects.#projects) {
+      if (JSON.stringify(proj) === JSON.stringify(project)) {
         console.log("this project already exists!");
-        return;
+        return false;
       }
     }
-    const newProject = new Project(null, project.title, project.description);
+
+    const newProject = new Project(project.title, project.description);
     this.#projects.add(newProject);
     // save to localStorage:
     Storage.setProject(newProject);

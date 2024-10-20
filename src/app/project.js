@@ -5,15 +5,23 @@ export default class Project {
   tasks = [];
   // id = uuidv4();
 
-  constructor(id, title, description) {
+  constructor(title, description, id = null) {
     this.title = title;
     this.description = description;
     this.id = id == null ? uuidv4() : id;
   }
 
-  addTask(title, dueDate, description, priority) {
-    const newTask = new Task(title, dueDate, description, priority, this.id);
+  addTask(task) {
+    const newTask = new Task(
+      task.title,
+      task.dueDate,
+      task.description,
+      task.priority,
+      this.id,
+    );
+    // console.log(newTask);
     this.tasks.push(newTask);
+    // console.log(this.tasks);
     return newTask;
   }
 

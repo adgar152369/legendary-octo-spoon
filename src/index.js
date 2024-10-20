@@ -6,9 +6,16 @@ import Storage from "./app/Storage";
 import Project from "./app/project";
 
 // const newProject = Projects.addProject({
-//   title: "Demo Project",
+//   title: "New Project",
 //   description: "Lorem ipsum",
 // });
+// newProject.addTask({
+//   title: "task 1",
+//   dueDate: "10-25-24",
+//   description: "lorem ipsum task",
+//   priority: "1",
+// });
+
 // const defaultProject = Projects.getProject(newProject.id);
 // Storage.setProject({
 //   id: defaultProject.id,
@@ -26,8 +33,8 @@ mainHeading.textContent = "Projects";
 createProjectBtn.textContent = "+ project";
 createProjectBtn.addEventListener("click", (e) => {
   e.preventDefault();
-  const projectModal = createProjectModal();
-  openProjectModal(projectModal);
+  createProjectModal();
+  // openProjectModal(projectModal);
 });
 // create projects list:
 const projectsList = document.createElement("ul");
@@ -38,28 +45,35 @@ bodyContent.appendChild(mainHeading);
 bodyContent.appendChild(projectsList); // append projects list to body content
 
 // START
+const projectsApp = new Projects();
+
 function renderProjects() {
-  // TODO: load from localStorage (from Projects class!):
-  new Projects();
-  const storedProjects = Projects.getProjects();
-  console.log(storedProjects);
+  if (Projects.getProjects().length > 0) {
+    // clear no-projects message
+    const message = document.querySelector(".no-projects-message");
+    const projects = document.querySelector(".projects-list");
+    projects.innerHTML = "";
 
-  if (storedProjects.length === 0) {
-    console.log("There are no projects to display yet.");
-    return false;
-  }
+    if (message) {
+      bodyContent.removeChild(message);
+    }
 
-  for (let project of storedProjects) {
-    const projectItem = generateProjectEl(project); // generate project items
-    addProjectToDOM(projectItem); // append project item to projects list
-    // TODO: save new project to localStorage
-    // render tasks:
-    // renderTasks(project);
+    for (const project of Projects.getProjects()) {
+      // generate project DOM elements
+      const projectEl = generateProjectEl(project);
+      addProjectToDOM(projectEl);
+    }
+  } else {
+    const emptyProjectsListEl = document.createElement("p");
+    emptyProjectsListEl.className = "no-projects-message";
+    emptyProjectsListEl.textContent = "No projects to display yet.";
+    bodyContent.appendChild(emptyProjectsListEl);
   }
 }
 
 function renderTasks(project) {
   const projectTasks = project.getTasks();
+  console.log(projectTasks);
   const tasksList = document.querySelector(
     `.tasks-list[data-project-id="${project.id.toString()}"]`,
   );
@@ -115,7 +129,7 @@ function createProjectModal() {
 
   bodyContent.appendChild(projectModal);
 
-  return projectModal;
+  openProjectModal(projectModal);
 }
 
 function openProjectModal(modal) {
@@ -150,11 +164,7 @@ function openProjectModal(modal) {
     };
 
     const newProjectData = Projects.addProject(projectData);
-    // renderProjects();
-    // addToLocalStorage(newProjectData);
-    const newProjectEl = generateProjectEl(newProjectData);
-    addProjectToDOM(newProjectEl);
-    // renderTasks(newProjectData);
+    renderProjects();
 
     modal.close();
     bodyContent.removeChild(modal);
@@ -304,7 +314,9 @@ function createTaskModal(parentProject) {
   });
 
   bodyContent.appendChild(newTaskModal);
-  return newTaskModal;
+
+  openProjectModal(newTaskModal);
+  // return newTaskModal;
 }
 
 function openTaskModal(modal) {
@@ -322,31 +334,27 @@ function openTaskModal(modal) {
   // TODO: add function to add task to storage and dom:
   taskModalCreateBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    console.log(taskProjectId);
-    // const parentProject = Projects.getProject(Number(taskProjectId));
-    // const strDate = taskDueDate.value;
-    // const isoDate = parseISO(strDate);
-    // const newTaskData = parentProject.addTask(
-    //   taskTitle.value,
-    //   format(isoDate, "MM/dd/yy"),
-    //   taskDescription.value,
-    //   taskPriority.value,
-    // );
-    // const newTaskEl = generateTaskEl(newTaskData);
-    // renderTasks(parentProject);
-    // // add to local storage:
-    // addToLocalStorage(newTaskData);
-    // modal.close();
-    // bodyContent.removeChild(modal);
-  });
-}
 
-function addToLocalStorage(itemType) {
-  if (itemType instanceof Task) {
-    console.log(Storage.setTask(itemType));
-  } else if (itemType instanceof Project) {
-    console.log(Storage.setProject(itemType));
-  }
+    const parentProject = Projects.getProject(taskProjectId);
+    // console.log(parentProject);
+    // console.log(Projects.getProjects());
+    const strDate = taskDueDate.value;
+    const isoDate = parseISO(strDate);
+    // // TODO: save task to localStorage in this method:
+    const newTaskData = parentProject.addTask({
+      title: taskTitle.value,
+      dueDate: format(isoDate, "MM/dd/yy"),
+      description: taskDescription.value,
+      priority: taskPriority.value,
+    });
+    console.log(parentProject);
+    // console.log(Projects.getProjects());
+    const newTaskEl = generateTaskEl(newTaskData);
+    renderTasks(parentProject);
+
+    modal.close();
+    bodyContent.removeChild(modal);
+  });
 }
 
 function createTask() {}

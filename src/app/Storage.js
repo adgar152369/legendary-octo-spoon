@@ -8,14 +8,12 @@ export default class Storage {
       priority,
       projectId,
     };
-
-    console.log(savedTask);
     localStorage.setItem(`Task-${id}-${projectId}`, JSON.stringify(savedTask));
     return true;
   }
 
-  static setProject({ id, title, description }) {
-    const savedProject = { id, title, description };
+  static setProject({ id, title, description, tasks }) {
+    const savedProject = { id, title, description, tasks };
 
     localStorage.setItem(`Project-${id}`, JSON.stringify(savedProject));
     return true;
@@ -26,5 +24,9 @@ export default class Storage {
     const deletedProject = { ...project };
     localStorage.removeItem(`Project-${id}`);
     return deletedProject;
+  }
+
+  static get localStorage() {
+    return localStorage;
   }
 }
