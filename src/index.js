@@ -248,12 +248,15 @@ function createTaskModal(parentProject) {
   const taskModalCreateBtn = document.createElement("button");
   const taskModalBtnContainer = document.createElement("div");
   const taskModalHeader = document.createElement("h3");
+  const taskDueDateLabel = document.createElement("label");
 
   taskModalCancelBtn.className = "cancel-btn task-modal-cancel";
   taskModalCreateBtn.className = "create-btn task-modal-create";
   taskModalForm.className = "modal-form task-modal-form";
   taskModalBtnContainer.className = "modal-btn-container";
   taskModalHeader.className = "task-modal-header";
+  taskDueDateLabel.className = "dueDate-label";
+  taskDueDateLabel.htmlFor = "dueDate";
   taskTitleInput.id = "title";
   taskDueDateInput.id = "dueDate";
   taskDescription.id = "description";
@@ -268,6 +271,7 @@ function createTaskModal(parentProject) {
 
   taskModalCancelBtn.textContent = "Cancel";
   taskModalCreateBtn.textContent = "Create";
+  taskDueDateLabel.textContent = "Due Date";
   taskTitleInput.placeholder = "Task Title";
   taskDueDateInput.placeholder = "Task Due Date";
   taskDescription.placeholder = "Task Description";
@@ -278,9 +282,10 @@ function createTaskModal(parentProject) {
   taskModalBtnContainer.appendChild(taskModalCreateBtn);
 
   taskModalForm.appendChild(taskTitleInput);
-  taskModalForm.appendChild(taskDueDateInput);
   taskModalForm.appendChild(taskDescription);
   taskModalForm.appendChild(taskPriority);
+  taskModalForm.appendChild(taskDueDateLabel);
+  taskModalForm.appendChild(taskDueDateInput);
 
   newTaskModal.appendChild(taskModalHeader);
   newTaskModal.appendChild(taskModalForm);
