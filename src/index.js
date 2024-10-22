@@ -262,8 +262,13 @@ function createTaskModal(parentProject) {
   taskDescription.id = "description";
   taskPriority.id = "priority";
   taskDueDateInput.type = "date";
+  taskTitleInput.name = "title";
+  taskDueDateInput.name = "dueDate";
+  taskDescription.name = "description";
+  taskPriority.name = "priority";
+  taskDueDateInput.type = "date";
   taskModalCancelBtn.type = "button";
-  taskModalCreateBtn.type = "button";
+  taskModalCreateBtn.type = "submit";
   taskModalForm.setAttribute(
     "data-project",
     parentProject.getAttribute("data-project-id"),
@@ -278,6 +283,10 @@ function createTaskModal(parentProject) {
   taskPriority.placeholder = "Task Priority";
   taskModalHeader.textContent = `Project: ${parentProject.querySelector(".project-title").textContent}`;
 
+  // required inputs:
+  taskTitleInput.required = true;
+  taskPriority.required = true;
+
   taskModalBtnContainer.appendChild(taskModalCancelBtn);
   taskModalBtnContainer.appendChild(taskModalCreateBtn);
 
@@ -286,10 +295,10 @@ function createTaskModal(parentProject) {
   taskModalForm.appendChild(taskPriority);
   taskModalForm.appendChild(taskDueDateLabel);
   taskModalForm.appendChild(taskDueDateInput);
+  taskModalForm.appendChild(taskModalBtnContainer);
 
   newTaskModal.appendChild(taskModalHeader);
   newTaskModal.appendChild(taskModalForm);
-  newTaskModal.appendChild(taskModalBtnContainer);
 
   taskModalCancelBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -310,21 +319,21 @@ function openTaskModal(modal) {
   const taskDescription = modal.querySelector("input#description");
   const taskPriority = modal.querySelector("input#priority");
   const taskModalCreateBtn = modal.querySelector(".task-modal-create");
-  const taskProjectId = modal
-    .querySelector(".task-modal-form")
-    .getAttribute("data-project");
+  const taskModalForm = document.querySelector(".task-modal-form");
+  const taskProjectId = taskModalForm.getAttribute("data-project");
 
-  // TODO: add function to add task to storage and dom:
   taskModalCreateBtn.addEventListener("click", (e) => {
     e.preventDefault();
+    if (!taskModalForm.checkValidity()) {
+      taskModalForm.reportValidity();
+      return;
+    }
     const parentProjectData = Projects.getProject(taskProjectId);
-    const strDate = taskDueDate.value;
-    const isoDate = parseISO(strDate);
+    const strDate = taskDueDate.value ? taskDueDate.value : null;
 
-    // TODO: save task to localStorage in this method:
     const newTaskData = parentProjectData.addTask({
       title: taskTitle.value,
-      dueDate: format(isoDate, "MM/dd/yy"),
+      dueDate: strDate == null ? "N/A" : new Date(strDate).toLocaleString(),
       description: taskDescription.value,
       priority: taskPriority.value,
     });

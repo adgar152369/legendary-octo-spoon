@@ -144,6 +144,7 @@ form.modal-form input {
 
 form.modal-form label {
     font-weight: 500;
+    color: #fff;
 }
 
 form.modal-form .cancel-btn {
