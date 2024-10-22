@@ -28,7 +28,7 @@ function renderProjects() {
   const projects = Projects.getProjects();
   projectsList.innerHTML = "";
 
-  if (projects.length > 0) {
+  if (projects && projects.length > 0) {
     const message = document.querySelector(".no-projects-message");
     if (message) bodyContent.removeChild(message);
 
