@@ -1,27 +1,6 @@
 import "./styles.css";
 import Projects from "./app/projects";
 import { format, parseISO } from "date-fns";
-import Task from "./app/task";
-import Storage from "./app/Storage";
-import Project from "./app/project";
-
-// const newProject = Projects.addProject({
-//   title: "New Project",
-//   description: "Lorem ipsum",
-// });
-// newProject.addTask({
-//   title: "task 1",
-//   dueDate: "10-25-24",
-//   description: "lorem ipsum task",
-//   priority: "1",
-// });
-
-// const defaultProject = Projects.getProject(newProject.id);
-// Storage.setProject({
-//   id: defaultProject.id,
-//   title: defaultProject.title,
-//   description: defaultProject.description,
-// });
 
 // DOM creation:
 const bodyContent = document.querySelector("#content");
@@ -34,10 +13,8 @@ createProjectBtn.textContent = "+ project";
 createProjectBtn.addEventListener("click", (e) => {
   e.preventDefault();
   createProjectModal();
-  // openProjectModal(projectModal);
 });
-// create projects list:
-const projectsList = document.createElement("ul");
+const projectsList = document.createElement("ul"); // create projects list
 projectsList.className = "projects-list";
 
 bodyContent.appendChild(createProjectBtn);
@@ -45,44 +22,47 @@ bodyContent.appendChild(mainHeading);
 bodyContent.appendChild(projectsList); // append projects list to body content
 
 // START
-const projectsApp = new Projects();
-
 function renderProjects() {
-  if (Projects.getProjects().length > 0) {
-    // clear no-projects message
+  const projectsApp = new Projects();
+  const projectsList = document.querySelector(".projects-list");
+  const projects = Projects.getProjects();
+  projectsList.innerHTML = "";
+
+  if (projects.length > 0) {
     const message = document.querySelector(".no-projects-message");
-    const projects = document.querySelector(".projects-list");
-    projects.innerHTML = "";
+    if (message) bodyContent.removeChild(message);
 
-    if (message) {
-      bodyContent.removeChild(message);
-    }
-
-    for (const project of Projects.getProjects()) {
-      // generate project DOM elements
+    for (const project of Array.from(projects)) {
       const projectEl = generateProjectEl(project);
       addProjectToDOM(projectEl);
+      renderTasks(project);
     }
   } else {
     const emptyProjectsListEl = document.createElement("p");
     emptyProjectsListEl.className = "no-projects-message";
-    emptyProjectsListEl.textContent = "No projects to display yet.";
+    emptyProjectsListEl.textContent = "No projects to display.";
     bodyContent.appendChild(emptyProjectsListEl);
   }
 }
 
 function renderTasks(project) {
-  const projectTasks = project.getTasks();
-  console.log(projectTasks);
   const tasksList = document.querySelector(
     `.tasks-list[data-project-id="${project.id.toString()}"]`,
   );
-
   tasksList.innerHTML = "";
-  projectTasks.forEach((task) => {
-    const taskItem = generateTaskEl(task); // generate task item
-    tasksList.appendChild(taskItem);
-  });
+  const tasks = project.tasks;
+
+  if (tasks.length === 0) {
+    const noTasksMessage = document.createElement("p");
+    noTasksMessage.className = "no-tasks-message";
+    noTasksMessage.textContent = "No tasks to display.";
+    tasksList.appendChild(noTasksMessage);
+  } else {
+    for (const task of tasks) {
+      const taskEl = generateTaskEl(task);
+      addTaskToDOM(taskEl, project.id);
+    }
+  }
 }
 
 function createProjectModal() {
@@ -172,13 +152,12 @@ function openProjectModal(modal) {
 }
 
 function generateProjectEl(projectData) {
-  // console.log(projectData);
   const projectsList = document.querySelector(".projects-list");
   const projectItem = document.createElement("li");
   const projectTitle = document.createElement("h2");
   const projectDescription = document.createElement("p");
   const projectDeleteBtn = document.createElement("button");
-  const projectTaskBtn = document.createElement("button");
+  const projectAddTaskBtn = document.createElement("button");
   const projectItemBtnContainer = document.createElement("div");
   // create tasks list for project:
   const tasksList = document.createElement("ul");
@@ -189,7 +168,7 @@ function generateProjectEl(projectData) {
   projectTitle.className = "project-title";
   projectDescription.className = "project-desc";
   projectDeleteBtn.className = "delete-btn project-delete-btn";
-  projectTaskBtn.className = "create-btn new-task-btn";
+  projectAddTaskBtn.className = "create-btn new-task-btn";
   projectItemBtnContainer.className = "project-btn-container";
 
   projectItem.setAttribute("data-project-id", projectData.id);
@@ -197,17 +176,17 @@ function generateProjectEl(projectData) {
   projectTitle.textContent = projectData.title;
   projectDescription.textContent = `Project Description: ${projectData.description}`;
   projectDeleteBtn.textContent = "-";
-  projectTaskBtn.textContent = "+ task";
+  projectAddTaskBtn.textContent = "+ task";
 
-  projectItemBtnContainer.appendChild(projectTaskBtn);
+  projectItemBtnContainer.appendChild(projectAddTaskBtn);
   projectItemBtnContainer.appendChild(projectDeleteBtn);
   projectItem.appendChild(projectTitle);
   projectItem.appendChild(projectItemBtnContainer);
   projectItem.appendChild(tasksList);
 
-  projectTaskBtn.addEventListener("click", () => {
-    const taskModal = createTaskModal(projectItem); // create new task modal
-    openTaskModal(taskModal);
+  projectAddTaskBtn.addEventListener("click", () => {
+    const taskModal = createTaskModal(projectItem);
+    // openTaskModal(taskModal);
   });
   projectDeleteBtn.addEventListener("click", () =>
     removeProject(projectData.id),
@@ -315,8 +294,7 @@ function createTaskModal(parentProject) {
 
   bodyContent.appendChild(newTaskModal);
 
-  openProjectModal(newTaskModal);
-  // return newTaskModal;
+  openTaskModal(newTaskModal);
 }
 
 function openTaskModal(modal) {
@@ -334,30 +312,23 @@ function openTaskModal(modal) {
   // TODO: add function to add task to storage and dom:
   taskModalCreateBtn.addEventListener("click", (e) => {
     e.preventDefault();
-
-    const parentProject = Projects.getProject(taskProjectId);
-    // console.log(parentProject);
-    // console.log(Projects.getProjects());
+    const parentProjectData = Projects.getProject(taskProjectId);
     const strDate = taskDueDate.value;
     const isoDate = parseISO(strDate);
-    // // TODO: save task to localStorage in this method:
-    const newTaskData = parentProject.addTask({
+
+    // TODO: save task to localStorage in this method:
+    const newTaskData = parentProjectData.addTask({
       title: taskTitle.value,
       dueDate: format(isoDate, "MM/dd/yy"),
       description: taskDescription.value,
       priority: taskPriority.value,
     });
-    console.log(parentProject);
-    // console.log(Projects.getProjects());
-    const newTaskEl = generateTaskEl(newTaskData);
-    renderTasks(parentProject);
+    renderTasks(parentProjectData);
 
     modal.close();
     bodyContent.removeChild(modal);
   });
 }
-
-function createTask() {}
 
 function addProjectToDOM(projectItem) {
   const projectsList = document.querySelector(".projects-list");
@@ -365,17 +336,28 @@ function addProjectToDOM(projectItem) {
 }
 
 function removeProject(id) {
-  const project = Projects.deleteProject(id);
-  console.log(project);
-  if (project == null) {
-    console.error("No such project exists!");
-    return;
-  }
-  const projectsList = document.querySelector(".projects-list");
-  const projectEl = projectsList.querySelector(
-    `.project[data-project-id="${project.id.toString()}"]`,
+  const confirmDelete = confirm(
+    "This will delete all associated tasks. Continue? ",
   );
-  projectsList.removeChild(projectEl);
+
+  if (confirmDelete) {
+    const project = Projects.deleteProject(id);
+    renderProjects();
+  } else {
+    console.log("canceled");
+  }
+
+  // const project = Projects.deleteProject(id);
+  // console.log(project);
+  // if (project == null) {
+  //   console.error("No such project exists!");
+  //   return;
+  // }
+  // const projectsList = document.querySelector(".projects-list");
+  // const projectEl = projectsList.querySelector(
+  //   `.project[data-project-id="${project.id.toString()}"]`,
+  // );
+  // projectsList.removeChild(projectEl);
 }
 
 function removeTask(task) {
@@ -386,13 +368,13 @@ function removeTask(task) {
   // console.log(parentProject.getTasks())
   const deletedTaskData = parentProject.deleteTask(task.id);
   // console.log(deletedTaskData)
-  renderTasks(parentProject);
+  // renderTasks(parentProject);
 }
 
-function addTaskToDOM(taskEl) {
-  const taskProjectId = taskEl.getAttribute("data-project-id");
+function addTaskToDOM(taskEl, projectId) {
+  // const taskProjectId = taskEl.getAttribute("data-project-id");
   const corrTasksList = document.querySelector(
-    `.tasks-list[data-project-id="${taskProjectId}"]`,
+    `.tasks-list[data-project-id="${projectId}"]`,
   );
 
   // append new task to tasks list:

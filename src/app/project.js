@@ -1,14 +1,13 @@
 import Task from "./task";
 import { v4 as uuidv4 } from "uuid";
+import Storage from "./Storage";
 
 export default class Project {
-  tasks = [];
-  // id = uuidv4();
-
-  constructor(title, description, id = null) {
+  constructor(title, description, tasks = [], id = null) {
     this.title = title;
     this.description = description;
     this.id = id == null ? uuidv4() : id;
+    this.tasks = tasks;
   }
 
   addTask(task) {
@@ -19,9 +18,8 @@ export default class Project {
       task.priority,
       this.id,
     );
-    // console.log(newTask);
     this.tasks.push(newTask);
-    // console.log(this.tasks);
+    this.saveToStorage(); // save updated project to localStorage
     return newTask;
   }
 
@@ -37,5 +35,14 @@ export default class Project {
     const deletedTask = this.tasks.splice(taskIndex, 1);
 
     return deletedTask;
+  }
+
+  saveToStorage() {
+    Storage.setProject({
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      tasks: this.tasks,
+    });
   }
 }

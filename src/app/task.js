@@ -1,15 +1,13 @@
-import Project from './project'
-import Projects from './projects'
+import { v4 as uuidv4 } from "uuid";
+import Projects from "./projects";
 
 export default class Task {
-  id = 1
-
   constructor(title, dueDate, description, priority, projectId) {
-    this.id = Projects.getProject(projectId).getTasks().length + 1
-    this.title = title
-    this.dueDate = dueDate
-    this.description = description
-    this.priority = priority
-    this.projectId = projectId
-  } 
+    this.id = uuidv4();
+    this.title = title;
+    this.dueDate = dueDate;
+    this.description = description;
+    this.priority = priority;
+    this.projectId = projectId;
+  }
 }
