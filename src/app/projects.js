@@ -24,6 +24,7 @@ export default class Projects {
             storedProjectData.tasks.map(
               (task) =>
                 new Task(
+                  task.id,
                   task.title,
                   task.dueDate,
                   task.description,
@@ -59,6 +60,7 @@ export default class Projects {
       storedProject.tasks.map(
         (task) =>
           new Task(
+            task.id,
             task.title,
             task.dueDate,
             task.description,

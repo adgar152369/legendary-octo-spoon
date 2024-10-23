@@ -12,6 +12,7 @@ export default class Project {
 
   addTask(task) {
     const newTask = new Task(
+      null,
       task.title,
       task.dueDate,
       task.description,
@@ -30,11 +31,15 @@ export default class Project {
     return this.tasks.find((task) => task.id === id);
   }
 
-  deleteTask(taskId) {
-    const taskIndex = this.tasks.findIndex((task) => task.id === taskId);
-    const deletedTask = this.tasks.splice(taskIndex, 1);
+  deleteTask(task) {
+    if (task) {
+      const taskId = task.id;
+      const taskIndex = this.tasks.findIndex((task) => task.id === taskId);
+      const deletedTask = this.tasks.splice(taskIndex, 1);
+      Storage.removeTask(this, taskId);
 
-    return deletedTask;
+      return deletedTask[0];
+    }
   }
 
   saveToStorage() {

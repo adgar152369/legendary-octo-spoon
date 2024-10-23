@@ -1,6 +1,7 @@
 import "./styles.css";
 import Projects from "./app/projects";
 import { format, parseISO } from "date-fns";
+import Toastify from "toastify-js";
 
 // DOM creation:
 const bodyContent = document.querySelector("#content");
@@ -330,10 +331,11 @@ function openTaskModal(modal) {
     }
     const parentProjectData = Projects.getProject(taskProjectId);
     const strDate = taskDueDate.value ? taskDueDate.value : null;
+    const isoDate = strDate === null ? null : parseISO(strDate);
 
     const newTaskData = parentProjectData.addTask({
       title: taskTitle.value,
-      dueDate: strDate == null ? "N/A" : new Date(strDate).toLocaleString(),
+      dueDate: isoDate === null ? "N/A" : format(isoDate, "MM/dd/yy"),
       description: taskDescription.value,
       priority: taskPriority.value,
     });
@@ -360,37 +362,30 @@ function removeProject(id) {
   } else {
     console.log("canceled");
   }
-
-  // const project = Projects.deleteProject(id);
-  // console.log(project);
-  // if (project == null) {
-  //   console.error("No such project exists!");
-  //   return;
-  // }
-  // const projectsList = document.querySelector(".projects-list");
-  // const projectEl = projectsList.querySelector(
-  //   `.project[data-project-id="${project.id.toString()}"]`,
-  // );
-  // projectsList.removeChild(projectEl);
 }
 
 function removeTask(task) {
-  const tasksList = document.querySelector(
-    `.tasks-list[data-project-id="${task.projectId.toString()}"]`,
-  );
   const parentProject = Projects.getProject(task.projectId);
-  // console.log(parentProject.getTasks())
-  const deletedTaskData = parentProject.deleteTask(task.id);
-  // console.log(deletedTaskData)
-  // renderTasks(parentProject);
+  if (parentProject == null) {
+    console.log("no project found");
+  } else {
+    const deletedTaskData = parentProject.deleteTask(task);
+    // show toast:
+    Toastify({
+      text: `"${deletedTaskData.title}" task deleted!`,
+      className: "delete-task-info",
+      stopOnFocus: true,
+      close: true,
+      duration: -1,
+    }).showToast();
+    renderTasks(parentProject);
+  }
 }
 
 function addTaskToDOM(taskEl, projectId) {
-  // const taskProjectId = taskEl.getAttribute("data-project-id");
   const corrTasksList = document.querySelector(
     `.tasks-list[data-project-id="${projectId}"]`,
   );
-
   // append new task to tasks list:
   corrTasksList.appendChild(taskEl);
 }

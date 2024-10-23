@@ -23,16 +23,19 @@ body {
     margin-top: 6rem;
 }
 
-h1 {
-    margin-top: 3rem;
-}
-
 h1,
 h2,
 h3,
 h4 {
     margin-bottom: 1rem;
     color: #667291;
+}
+
+.main-heading {
+    font-weight: 400;
+    margin-top: 3rem;
+    margin-bottom: 5rem;
+    font-size: 2.5rem;
 }
 
 ul {
@@ -241,4 +244,26 @@ p.task-priority.med-priority {
 
 p.task-priority.high-priority {
     background-color: red;
+}
+
+.delete-task-info {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background-color: red;
+    color: white;
+    border: black;
+    width: 300px;
+    border-radius: 10px;
+    padding: 20px;
+    background: darkred;
+    font-weight: 400;
+}
+
+button.toast-close {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    background: none;
+    font-size: 1rem;
 }

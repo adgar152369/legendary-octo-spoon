@@ -26,7 +26,21 @@ export default class Storage {
     return deletedProject;
   }
 
-  static get localStorage() {
-    return localStorage;
+  static removeTask(project, taskId) {
+    const projectData = JSON.parse(
+      localStorage.getItem(`Project-${project.id}`),
+    );
+    const taskIndex = projectData.tasks.findIndex((task) => task.id === taskId);
+
+    if (taskIndex !== -1) {
+      projectData.tasks.splice(taskIndex, 1);
+      localStorage.setItem(
+        `Project-${project.id}`,
+        JSON.stringify(projectData),
+      );
+      console.log(`Task ${taskId} removed successfully.`);
+    } else {
+      console.log("Project or tasks not found.");
+    }
   }
 }
