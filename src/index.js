@@ -2,6 +2,8 @@ import "./styles.css";
 import Projects from "./app/projects";
 import { format, parseISO } from "date-fns";
 import Toastify from "toastify-js";
+import AirDatepicker from "air-datepicker";
+import "air-datepicker/air-datepicker.css";
 
 // DOM creation:
 const bodyContent = document.querySelector("#content");
@@ -186,7 +188,7 @@ function generateProjectEl(projectData) {
   projectItem.appendChild(tasksList);
 
   projectAddTaskBtn.addEventListener("click", () => {
-    const taskModal = createTaskModal(projectItem);
+    const taskModal = createTaskModal(projectData);
     // openTaskModal(taskModal);
   });
   projectDeleteBtn.addEventListener("click", () =>
@@ -231,14 +233,18 @@ function generateTaskEl(taskData) {
   taskItem.appendChild(taskPriority);
 
   // task event listeners:
-  taskDeleteBtn.addEventListener("click", () => removeTask(taskData));
+  taskItem.addEventListener("click", () => editTask(taskData));
+  taskDeleteBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    removeTask(taskData);
+  });
 
   return taskItem;
 }
 
 function createTaskModal(parentProject) {
-  const projectElement = document.querySelector(".project");
-  const newTaskModal = document.createElement("dialog");
+  const newTaskModal = document.createElement("div");
+  const taskModalBackdrop = document.createElement("div");
   const taskModalForm = document.createElement("form");
   // inputs
   const taskTitleInput = document.createElement("input");
@@ -249,15 +255,16 @@ function createTaskModal(parentProject) {
   const taskModalCreateBtn = document.createElement("button");
   const taskModalBtnContainer = document.createElement("div");
   const taskModalHeader = document.createElement("h3");
-  const taskDueDateLabel = document.createElement("label");
+  // const taskDueDateLabel = document.createElement("label");
 
+  taskDueDateInput.placeholder = "Due date";
+
+  newTaskModal.className = "task-modal";
   taskModalCancelBtn.className = "cancel-btn task-modal-cancel";
   taskModalCreateBtn.className = "create-btn task-modal-create";
   taskModalForm.className = "modal-form task-modal-form";
   taskModalBtnContainer.className = "modal-btn-container";
   taskModalHeader.className = "task-modal-header";
-  taskDueDateLabel.className = "dueDate-label";
-  taskDueDateLabel.htmlFor = "dueDate";
   taskTitleInput.id = "title";
   taskDueDateInput.id = "dueDate";
   taskDescription.id = "description";
@@ -267,24 +274,19 @@ function createTaskModal(parentProject) {
   taskDueDateInput.name = "dueDate";
   taskDescription.name = "description";
   taskPriority.name = "priority";
-  taskDueDateInput.type = "date";
+  taskDueDateInput.type = "text";
   taskModalCancelBtn.type = "button";
   taskModalCreateBtn.type = "submit";
-  taskModalForm.setAttribute(
-    "data-project",
-    parentProject.getAttribute("data-project-id"),
-  );
+  taskModalForm.setAttribute("data-project", parentProject.id);
+  taskModalHeader.textContent = parentProject.title;
 
   taskModalCancelBtn.textContent = "Cancel";
   taskModalCreateBtn.textContent = "Create";
-  taskDueDateLabel.textContent = "Due Date";
   taskTitleInput.placeholder = "Task Title";
-  taskDueDateInput.placeholder = "Task Due Date";
   taskDescription.placeholder = "Task Description";
   taskPriority.placeholder = "Task Priority";
-  taskModalHeader.textContent = `Project: ${parentProject.querySelector(".project-title").textContent}`;
+  taskModalBackdrop.className = "modal-backdrop";
 
-  // required inputs:
   taskTitleInput.required = true;
   taskPriority.required = true;
 
@@ -294,7 +296,6 @@ function createTaskModal(parentProject) {
   taskModalForm.appendChild(taskTitleInput);
   taskModalForm.appendChild(taskDescription);
   taskModalForm.appendChild(taskPriority);
-  taskModalForm.appendChild(taskDueDateLabel);
   taskModalForm.appendChild(taskDueDateInput);
   taskModalForm.appendChild(taskModalBtnContainer);
 
@@ -303,17 +304,69 @@ function createTaskModal(parentProject) {
 
   taskModalCancelBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    newTaskModal.close();
+    taskModalBackdrop.classList.add("close");
     bodyContent.removeChild(newTaskModal);
+    document.querySelector("body").removeChild(taskModalBackdrop);
   });
 
   bodyContent.appendChild(newTaskModal);
+  document.querySelector("body").appendChild(taskModalBackdrop);
 
   openTaskModal(newTaskModal);
 }
 
 function openTaskModal(modal) {
-  modal.showModal();
+  const taskModalBackdrop = document.querySelector(".modal-backdrop");
+  const dp = new AirDatepicker("#dueDate", {
+    language: "en",
+    autoClose: true,
+    dateFormat: "MM/dd/yyyy",
+    locale: {
+      days: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
+      daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      daysMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+      months: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ],
+      monthsShort: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+      today: "Today",
+      clear: "Clear",
+      dateFormat: "MM/dd/yyyy",
+      firstDay: 0,
+    },
+  });
 
   const taskTitle = modal.querySelector("input#title");
   const taskDueDate = modal.querySelector("input#dueDate");
@@ -335,13 +388,12 @@ function openTaskModal(modal) {
 
     const newTaskData = parentProjectData.addTask({
       title: taskTitle.value,
-      dueDate: isoDate === null ? "N/A" : format(isoDate, "MM/dd/yy"),
+      dueDate: taskDueDate.value,
       description: taskDescription.value,
       priority: taskPriority.value,
     });
     renderTasks(parentProjectData);
-
-    modal.close();
+    document.querySelector("body").removeChild(taskModalBackdrop);
     bodyContent.removeChild(modal);
   });
 }
@@ -373,7 +425,7 @@ function removeTask(task) {
     // show toast:
     Toastify({
       text: `"${deletedTaskData.title}" task deleted!`,
-      className: "delete-task-info",
+      className: "task-toast delete-task-info",
       stopOnFocus: true,
       close: true,
       duration: -1,
@@ -382,11 +434,67 @@ function removeTask(task) {
   }
 }
 
+function editTask(taskToEdit) {
+  const parentProjectData = Projects.getProject(taskToEdit.projectId);
+  createTaskModal(parentProjectData);
+
+  const taskModalForm = document.querySelector(".task-modal-form");
+  const taskModalBackdrop = document.querySelector(".modal-backdrop");
+  const taskModalCreateBtn = document.querySelector(".task-modal-create");
+  const taskModalBtnContainer = document.querySelector(".modal-btn-container");
+  const taskModalSaveBtn = document.createElement("button");
+  const taskTitle = taskModalForm.querySelector("input#title");
+  const taskDueDate = taskModalForm.querySelector("input#dueDate");
+  const taskDescription = taskModalForm.querySelector("input#description");
+  const taskPriority = taskModalForm.querySelector("input#priority");
+
+  taskModalBtnContainer.removeChild(taskModalCreateBtn);
+  taskModalBtnContainer.appendChild(taskModalSaveBtn);
+
+  taskModalSaveBtn.className = "create-btn task-save-btn";
+
+  // pre-fill inputs
+  taskTitle.value = taskToEdit.title;
+  taskDueDate.value = taskToEdit.dueDate;
+  taskDescription.value = taskToEdit.description;
+  taskPriority.value = taskToEdit.priority;
+  taskModalSaveBtn.textContent = "Save";
+
+  taskModalSaveBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    // get tasks from parent project:
+    for (const task of parentProjectData.tasks) {
+      if (task.id === taskToEdit.id) {
+        const savedTask = parentProjectData.saveTask({
+          id: task.id,
+          title: taskTitle.value,
+          dueDate: taskDueDate.value,
+          description: taskDescription.value,
+          priority: taskPriority.value,
+          projectId: task.projectId,
+        });
+      }
+    }
+    const modal = document.querySelector(".task-modal");
+    document.querySelector("body").removeChild(taskModalBackdrop);
+    bodyContent.removeChild(modal);
+    renderTasks(parentProjectData);
+    // TODO: show Toast on save:
+    Toastify({
+      text: `successfully changed "${taskToEdit.title}" task!`,
+      className: "task-toast add-task-info",
+      stopOnFocus: true,
+      close: true,
+      duration: -1,
+    }).showToast();
+  });
+}
+
 function addTaskToDOM(taskEl, projectId) {
   const corrTasksList = document.querySelector(
     `.tasks-list[data-project-id="${projectId}"]`,
   );
-  // append new task to tasks list:
   corrTasksList.appendChild(taskEl);
 }
 

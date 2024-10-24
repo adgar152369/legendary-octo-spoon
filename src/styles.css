@@ -79,8 +79,31 @@ dialog {
     padding: 2rem;
 }
 
-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.5);
+.task-modal {
+    position: absolute;
+    top: 50%; /* Position it 50% from the top of its container */
+    left: 50%; /* Position it 50% from the left of its container */
+    transform: translate(-50%, -50%);
+    border: none;
+    border-radius: 5px;
+    background-color: #28292f;
+    margin: auto;
+    padding: 2rem;
+    z-index: 10;
+}
+
+.modal-backdrop {
+    position: fixed; /* Cover the entire viewport */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7); /* Dark background with transparency */
+    z-index: 1;
+}
+
+.modal-backdrop.close {
+    display: none;
 }
 
 input {
@@ -200,7 +223,9 @@ button.task-delete-btn {
     opacity: 0;
     padding: 0;
     margin-left: auto;
-    float: right;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 li.project:hover button.project-delete-btn {
@@ -223,6 +248,7 @@ button.new-task-btn {
 .task p {
     color: lightgrey;
     font-size: 0.75rem;
+    font-weight: 400;
 }
 
 p.task-priority {
@@ -231,11 +257,12 @@ p.task-priority {
     border-radius: 50%;
     height: 20px;
     width: 20px;
-    float: right;
     font-size: 0.75rem;
     font-weight: 500;
     justify-content: center;
     align-items: center;
+    margin-top: 1rem;
+    margin-left: auto;
 }
 
 p.task-priority.med-priority {
@@ -246,7 +273,7 @@ p.task-priority.high-priority {
     background-color: red;
 }
 
-.delete-task-info {
+.task-toast {
     position: absolute;
     right: 20px;
     top: 20px;
@@ -258,6 +285,11 @@ p.task-priority.high-priority {
     padding: 20px;
     background: darkred;
     font-weight: 400;
+    line-height: 24px;
+}
+
+.task-toast.add-task-info {
+    background-color: green;
 }
 
 button.toast-close {
@@ -266,4 +298,12 @@ button.toast-close {
     top: 5px;
     background: none;
     font-size: 1rem;
+}
+
+.air-datepicker {
+    z-index: 10000 !important; /* Set a high z-index for the datepicker */
+}
+
+h3.task-modal-header {
+    margin-bottom: 3rem;
 }

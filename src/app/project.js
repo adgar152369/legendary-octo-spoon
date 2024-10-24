@@ -24,6 +24,17 @@ export default class Project {
     return newTask;
   }
 
+  saveTask(task) {
+    const taskIndex = this.tasks.findIndex((t) => t.id === task.id);
+    this.tasks.splice(taskIndex, 1, task);
+    Storage.setProject({
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      tasks: this.tasks,
+    });
+  }
+
   getTasks() {
     return this.tasks;
   }
