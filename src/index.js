@@ -1,6 +1,5 @@
 import "./styles.css";
 import Projects from "./app/projects";
-import { format, parseISO } from "date-fns";
 import Toastify from "toastify-js";
 import AirDatepicker from "air-datepicker";
 import "air-datepicker/air-datepicker.css";
@@ -383,9 +382,6 @@ function openTaskModal(modal) {
       return;
     }
     const parentProjectData = Projects.getProject(taskProjectId);
-    const strDate = taskDueDate.value ? taskDueDate.value : null;
-    const isoDate = strDate === null ? null : parseISO(strDate);
-
     const newTaskData = parentProjectData.addTask({
       title: taskTitle.value,
       dueDate: taskDueDate.value,
